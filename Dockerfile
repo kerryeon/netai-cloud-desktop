@@ -73,13 +73,15 @@ ADD getty_override.conf /etc/systemd/system/console-getty.service.d/override.con
 ADD pacman-init /usr/local/bin/
 ADD pacman-init.service /etc/systemd/system/
 ADD startx /usr/local/bin/
-RUN systemctl enable pacman-init
+ADD startx.service /etc/systemd/user/
+RUN systemctl enable pacman-init \
+  && chmod +x /usr/local/bin/pacman-init \
+  && chmod +x /usr/local/bin/startx
 
 # Customize user settings
 USER $user
 ADD autostart/ /home/$user/.config/autostart/
-ADD startx.service /home/$user/.config/systemd/user/
-RUN sudo chown $user:users /home/$user \
+RUN sudo chown -R $user:users /home/$user \
   # Enable starting X
   && systemctl enable --user startx.service \
   # zsh

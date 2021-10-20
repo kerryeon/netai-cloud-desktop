@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ ! -f /etc/pacman.d/gnupg ]; then
     # Generate a default secret key
     pacman-key --init

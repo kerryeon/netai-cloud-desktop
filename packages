@@ -1,5 +1,6 @@
 # Audio
 gst-plugin-pipewire
+pavucontrol
 pipewire
 pipewire-alsa
 pipewire-pulse
