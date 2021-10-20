@@ -1,26 +1,14 @@
 #!/bin/bash
 
-# --cap-drop ALL \
-# --cap-add AUDIT_WRITE \
-# --cap-add CHOWN \
-# --cap-add DAC_OVERRIDE \
-# --cap-add FOWNER \
-# --cap-add FSETID \
-# --cap-add KILL \
-# --cap-add SETGID \
-# --cap-add SETPCAP \
-# --cap-add SETUID \
-# --cap-add SYS_BOOT \
+# screen
+Xephyr -br -ac -noreset -screen 800x600 -listen tcp :127 2>/dev/null &
+screen=$!
 
-# on local:
-# TODO: open monitor automatically
-# TODO: poweroff when monitor is dead
-# Xephyr -br -ac -noreset -screen 800x600 -listen tcp :127
-
-podman run --rm -it \
+# container
+podman run --detach --rm -it \
     --name "xfce" \
     --net "slirp4netns:allow_host_loopback=true" \
-    --previleged \
+    --privileged \
     --security-opt "label=type:container_runtime_t" \
     --stop-signal "SIGRTMIN+3" \
     --systemd="always" \
@@ -28,4 +16,25 @@ podman run --rm -it \
     --tmpfs "/run/lock" \
     --volume "/home/h/.Xauthority:$XAUTHORITY:ro" \
     --workdir "/tmp" \
-    -- "localhost/kerryeon/archlinux-xfce"
+    -- "localhost/kerryeon/archlinux-xfce" >/dev/null
+podman wait xfce >/dev/null 2>/dev/null &
+container=$!
+
+# Wait until one of them is downed
+echo Waiting until system is downed...
+while true; do
+    if ! ps $screen >/dev/null; then
+        echo Xephyr is downed.
+        podman stop xfce >/dev/null 2>/dev/null
+        wait $container
+        break
+    fi
+
+    if ! ps $container >/dev/null; then
+        echo Container is downed.
+        kill $screen 2>/dev/null
+        break
+    fi
+
+    sleep 1
+done

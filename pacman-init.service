@@ -1,0 +1,10 @@
+[Unit]
+Description=Initiate pacman
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/pacman-init
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

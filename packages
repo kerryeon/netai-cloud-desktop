@@ -1,6 +1,15 @@
+# Audio
+gst-plugin-pipewire
+pipewire
+pipewire-alsa
+pipewire-pulse
+
 # Desktop environment
+gvfs
+gvfs-mtp
 picom-git
 plank
+trash-cli
 xfce4
 xfce4-goodies
 
@@ -24,6 +33,7 @@ nimf
 wayland-protocols
 
 # Utility
+blueman
 file-roller
 
 # Web browser
@@ -31,5 +41,4 @@ google-chrome
 firefox
 
 # Xorg
-xorg-xinit
 xorg-xrandr

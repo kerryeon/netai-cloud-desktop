@@ -5,7 +5,7 @@ Description=Xfce Desktop
 Type=simple
 Environment=DISPLAY=10.0.2.2:127
 Environment=XAUTHORITY=/X/Xauthority.client
-ExecStart=/usr/bin/startxfce4
+ExecStart=/usr/local/bin/startx
 Restart=on-failure
 
 [Install]

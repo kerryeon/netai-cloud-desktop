@@ -32,15 +32,9 @@ RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
   && pacman -Sc --noconfirm
 
 # Install yay: AUR package manager
-RUN pacman -Sy \
-  && pacman -S --noconfirm \
+RUN pacman -S --noconfirm \
   yay \
   && pacman -Sc --noconfirm
-
-# Enable systemd
-USER root
-ADD getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf
-ADD xfce.service /etc/systemd/user/
 
 # Create makepkg user and workdir
 ARG makepkg=makepkg
@@ -53,7 +47,6 @@ RUN useradd $user -m -g users -G wheel -s /bin/zsh \
   && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
 
 # Configure system
-USER root
 RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
   && sed -i 's/^#\(en_US\.UTF-8.*\)$/\1/g' /etc/locale.gen \
   && sed -i 's/^#\(ko_KR\.EUC-KR.*\)$/\1/g' /etc/locale.gen \
@@ -65,8 +58,7 @@ RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
 USER $makepkg
 WORKDIR /tmp
 ADD packages .
-RUN yay -Syy \
-  && yay -S --needed --noconfirm $(sudo cat packages | grep -o '^[^#]*') \
+RUN yay -S --needed --noconfirm $(sudo cat packages | grep -o '^[^#]*') \
   && yay -Sc --noconfirm \
   && yay -Scc --noconfirm \
   && sudo rm packages \
@@ -75,14 +67,28 @@ RUN yay -Syy \
   # ex) pacman-key --init
   && sudo rm -rf /etc/pacman.d/gnupg
 
+# Enable systemd
+USER root
+ADD getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf
+ADD pacman-init /usr/local/bin/
+ADD pacman-init.service /etc/systemd/system/
+ADD startx /usr/local/bin/
+RUN systemctl enable pacman-init
+
 # Customize user settings
 USER $user
-ADD .xinitrc /home/$user/
+ADD autostart/ /home/$user/.config/autostart/
+ADD startx.service /home/$user/.config/systemd/user/
 RUN sudo chown $user:users /home/$user \
   # Enable starting X
-  && systemctl enable --user xfce.service \
+  && systemctl enable --user startx.service \
   # zsh
-  && cp /usr/share/oh-my-zsh/zshrc /home/$user/.zshrc
+  && cp /usr/share/oh-my-zsh/zshrc /home/$user/.zshrc \
+  # nimf
+  && printf 'export GTK_IM_MODULE="nimf"' >> /home/$user/.zshrc \
+  && printf 'export QT4_IM_MODULE="nimf"' >> /home/$user/.zshrc \
+  && printf 'export QT_IM_MODULE="nimf"' >> /home/$user/.zshrc \
+  && printf 'export XMODIFIERS="@im=nimf"' >> /home/$user/.zshrc
 
 # Initiate with systemd
 USER root

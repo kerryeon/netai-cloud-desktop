@@ -1,0 +1,9 @@
+if [ ! -f /etc/pacman.d/gnupg ]; then
+    # Generate a default secret key
+    pacman-key --init
+    pacman-key --populate archlinux
+    pacman-key --populate archlinuxcn
+fi
+
+# Disable it
+exec systemctl disable pacman-init
