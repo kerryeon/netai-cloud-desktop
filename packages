@@ -1,0 +1,35 @@
+# Desktop environment
+picom-git
+plank
+xfce4
+xfce4-goodies
+
+# Development Tools
+bash-completion
+oh-my-zsh-git
+visual-studio-code-bin
+zsh
+zsh-completions
+
+# Fonts
+adobe-source-han-sans-kr-fonts
+adobe-source-han-serif-kr-fonts
+noto-fonts-cjk
+ttf-fira-code
+
+# IME
+m17n-db
+m17n-lib
+nimf
+wayland-protocols
+
+# Utility
+file-roller
+
+# Web browser
+google-chrome
+firefox
+
+# Xorg
+xorg-xinit
+xorg-xrandr

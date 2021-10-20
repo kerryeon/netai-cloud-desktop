@@ -1,0 +1,91 @@
+# Select Desktop Environment
+FROM docker.io/archlinux:base-devel
+
+# Install reflector for faster installation
+ARG reflector_country="KR"
+RUN pacman -Sy \
+  && pacman -S --needed --noconfirm \
+  reflector \
+  && pacman -Sc --noconfirm \
+  && sed -i "s/\(^# --country.*\$\)/\1\n--country $reflector_country/g" /etc/xdg/reflector/reflector.conf \
+  && systemctl enable reflector.timer \
+  && reflector --country $reflector_country > /etc/pacman.d/mirrorlist
+
+# Add more package repositories
+RUN printf '\n[archlinuxcn]\nServer = https://repo.archlinuxcn.org/$arch' >> /etc/pacman.conf \
+  && printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf \
+  # generate a default secret key
+  && pacman-key --init \
+  # refresh database because of changing mirrorlists
+  && pacman -Syy \
+  # import PGP keys
+  && pacman -S --noconfirm \
+  archlinux-keyring \
+  archlinuxcn-keyring \
+  && pacman -Sc --noconfirm
+
+# Reinstall excluded files
+RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
+  && rm /etc/locale.gen \
+  && pacman -Syy \
+  && pacman -Qqn | pacman -S --noconfirm --overwrite="*" - \
+  && pacman -Sc --noconfirm
+
+# Install yay: AUR package manager
+RUN pacman -Sy \
+  && pacman -S --noconfirm \
+  yay \
+  && pacman -Sc --noconfirm
+
+# Enable systemd
+USER root
+ADD getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf
+ADD xfce.service /etc/systemd/user/
+
+# Create makepkg user and workdir
+ARG makepkg=makepkg
+RUN useradd --system --create-home $makepkg \
+  && echo "$makepkg ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$makepkg
+
+# Create normal user account
+ARG user=user
+RUN useradd $user -m -g users -G wheel -s /bin/zsh \
+  && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
+
+# Configure system
+USER root
+RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
+  && sed -i 's/^#\(en_US\.UTF-8.*\)$/\1/g' /etc/locale.gen \
+  && sed -i 's/^#\(ko_KR\.EUC-KR.*\)$/\1/g' /etc/locale.gen \
+  && sed -i 's/^#\(ko_KR\.UTF-8.*\)$/\1/g' /etc/locale.gen \
+  && locale-gen \
+  && ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+
+# Install dependencies
+USER $makepkg
+WORKDIR /tmp
+ADD packages .
+RUN yay -Syy \
+  && yay -S --needed --noconfirm $(sudo cat packages | grep -o '^[^#]*') \
+  && yay -Sc --noconfirm \
+  && yay -Scc --noconfirm \
+  && sudo rm packages \
+  # remove the default secret key
+  # note: manual key generation is required
+  # ex) pacman-key --init
+  && sudo rm -rf /etc/pacman.d/gnupg
+
+# Customize user settings
+USER $user
+ADD .xinitrc /home/$user/
+RUN sudo chown $user:users /home/$user \
+  # Enable starting X
+  && systemctl enable --user xfce.service \
+  # zsh
+  && cp /usr/share/oh-my-zsh/zshrc /home/$user/.zshrc
+
+# Initiate with systemd
+USER root
+WORKDIR /tmp
+ENTRYPOINT [ "/sbin/init" ]
+CMD [ "systemctl" ]
