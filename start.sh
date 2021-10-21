@@ -16,11 +16,11 @@
 ################################################################################
 
 # audio
-if [ ! which pipewire ] 2>/dev/null; then
+if [ ! $(which pipewire) ] 2>/dev/null; then
     echo "pipewire is not installed!"
     exit 1
 fi
-if [ ! systemctl is-active --user pipewire ]; then
+if [ ! $(systemctl is-active --user pipewire) ]; then
     echo "pipewire is not running!"
     exit 1
 fi
@@ -54,7 +54,6 @@ if [[ "$tty_num" =~ ^/.* ]]; then
         exit 1
     else
         # nested tty mode
-        printf 'Drivers (blueman, cups, ...) is not supported on Nested TTY mode.'
         POD_TTY="127"
         Xephyr -br -ac -noreset -screen 800x600 -listen tcp :$POD_TTY 2>/dev/null &
         screen=$!
@@ -80,6 +79,8 @@ fi
 
 # TODO: share all video devices
 # note: https://github.com/mviereck/x11docker/wiki/Hardware-acceleration#share-nvidia-device-files-with-container
+
+# TODO: share other modules - bluetooth, USB,
 
 # --device "/dev/video0":"/dev/video0":rw \
 # --device "/dev/video1":"/dev/video1":rw \
@@ -111,7 +112,6 @@ podman wait xfce >/dev/null 2>/dev/null &
 container=$!
 
 # audio
-pactl unload-module $audio_id 2>/dev/null || true # unload lastly used module
 audio_id=$(pactl load-module module-native-protocol-tcp port=$audio_port auth-ip-acl=$audio_client_ip)
 
 ################################################################################
@@ -143,4 +143,4 @@ done
 ################################################################################
 
 # audio
-pactl unload-module $audio_id
+pactl unload-module module-native-protocol-tcp $audio_id
