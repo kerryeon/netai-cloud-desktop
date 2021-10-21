@@ -16,11 +16,11 @@
 ################################################################################
 
 # audio
-if [ ! $(which pipewire || which pulseaudio) ] 2>/dev/null; then
+if [[ ! $(which pipewire || which pulseaudio) ]] 2>/dev/null; then
     echo "pipewire (pulseaudio) is not installed!"
     exit 1
 fi
-if [ ! $(systemctl is-active --user pipewire || systemctl is-active --user pulseaudio) ]; then
+if [[ ! $(systemctl is-active --user pipewire || systemctl is-active --user pulseaudio) ]]; then
     echo "pipewire (pulseaudio) is not running!"
     exit 1
 fi
@@ -70,7 +70,7 @@ POD_GATEWAY="10.0.2.2"
 POD_DISPLAY="$POD_GATEWAY:$POD_TTY"
 POD_XAUTHORITY="/X/Xauthority.client"
 
-if [ -z $HOOST_XAUTHORITY ]; then
+if [[ -z $HOOST_XAUTHORITY ]]; then
     HOST_XAUTHORITY="$HOME/.Xauthority"
 fi
 
