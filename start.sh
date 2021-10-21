@@ -75,6 +75,12 @@ if [ -z $HOOST_XAUTHORITY ]; then
     HOST_XAUTHORITY="$HOME/.Xauthority"
 fi
 
+# TODO: share all NVIDIA modules
+# note: https://github.com/mviereck/x11docker/wiki/Hardware-acceleration#share-nvidia-device-files-with-container
+
+# TODO: share all video devices
+# note: https://github.com/mviereck/x11docker/wiki/Hardware-acceleration#share-nvidia-device-files-with-container
+
 # --device "/dev/video0":"/dev/video0":rw \
 # --device "/dev/video1":"/dev/video1":rw \
 # --user "$(id -u $USER):$(id -g $USER)" \
@@ -84,7 +90,6 @@ fi
 podman run --detach --rm -it \
     --cap-add "all" \
     --device "/dev/dri":"/dev/dri":rw \
-    --device "/dev/snd":"/dev/snd":rw \
     --device "/dev/vga_arbiter":"/dev/vga_arbiter":rw \
     --env "POD_DISPLAY=$POD_DISPLAY" \
     --env "POD_PULSE_SERVER=$POD_PULSE_SERVER" \
