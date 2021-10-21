@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Halt commands if an error occured
-set -e
-
 # bash -x x11docker --desktop \
 #     --backend=podman \
 #     --clipboard \
@@ -56,6 +53,8 @@ if [ -z $HOOST_XAUTHORITY ]; then
     HOST_XAUTHORITY="$HOME/.Xauthority"
 fi
 
+# --device "/dev/video0":"/dev/video0":rw \
+# --device "/dev/video1":"/dev/video1":rw \
 # --user "$(id -u $USER):$(id -g $USER)" \
 # --userns="keep-id" \
 # --privileged \
@@ -65,11 +64,9 @@ podman run --detach --rm -it \
     --device "/dev/dri":"/dev/dri":rw \
     --device "/dev/snd":"/dev/snd":rw \
     --device "/dev/vga_arbiter":"/dev/vga_arbiter":rw \
-    --device "/dev/video0":"/dev/video0":rw \
-    --device "/dev/video1":"/dev/video1":rw \
     --env "POD_DISPLAY=$POD_DISPLAY" \
+    --env "POD_PULSE_SERVER=$POD_PULSE_SERVER" \
     --env "POD_XAUTHORITY=$POD_XAUTHORITY" \
-    --env "PULSE_SERVER=$POD_PULSE_SERVER" \
     --group-add "$(getgid audio)" \
     --group-add "$(getgid render)" \
     --group-add "$(getgid video)" \
