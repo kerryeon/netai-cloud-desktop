@@ -16,6 +16,7 @@ xfce4-goodies
 
 # Development Tools
 bash-completion
+cmake
 oh-my-zsh-git
 visual-studio-code-bin
 zsh
@@ -26,6 +27,20 @@ adobe-source-han-sans-kr-fonts
 adobe-source-han-serif-kr-fonts
 noto-fonts-cjk
 ttf-fira-code
+
+# Graphics
+## MESA
+mesa-demos
+## AMD
+lib32-vulkan-radeon
+vulkan-tools
+vulkan-radeon
+## Intel
+lib32-vulkan-intel
+vulkan-intel
+## NVIDIA
+lib32-nvidia-utils
+nvidia-utils
 
 # IME
 m17n-db
