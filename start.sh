@@ -12,7 +12,6 @@ if [[ "$tty_num" =~ ^/.* ]]; then
         POD_TTY="127"
         Xephyr -br -ac -noreset -screen 800x600 -listen tcp :$POD_TTY 2>/dev/null &
         screen=$!
-        exit 1
     fi
 else
     # tty mode

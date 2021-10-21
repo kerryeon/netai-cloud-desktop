@@ -4,6 +4,8 @@
 set -e
 
 # Set environment variables
+POD_XAUTHORITY=$(echo $POD_XAUTHORITY | sed 's;/;\\/;g')
+
 sed -i "s/^\(Environment=DISPLAY=\).*$/\1$POD_DISPLAY/g" /etc/systemd/user/startx.service
 sed -i "s/^\(Environment=XAUTHORITY=\).*$/\1$POD_XAUTHORITY/g" /etc/systemd/user/startx.service
 

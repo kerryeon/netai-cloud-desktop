@@ -3,9 +3,9 @@ Description=Xfce Desktop
 
 [Service]
 Type=simple
-Environment=DISPLAY=10.0.2.2:127
-Environment=XAUTHORITY=/X/Xauthority.client
-ExecStart=/usr/local/bin/startx
+Environment=DISPLAY=
+Environment=XAUTHORITY=
+ExecStart=/usr/bin/startxfce4
 Restart=on-failure
 
 [Install]
