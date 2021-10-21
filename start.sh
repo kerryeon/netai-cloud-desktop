@@ -20,6 +20,12 @@ function getgid() {
     cut -d: -f3 < <(getent group $name)
 }
 
+# audio (pipewire)
+audio_client_ip="10.0.2.100"
+audio_host_ip="10.0.2.2"
+audio_port="47130"
+POD_PULSE_SERVER="tcp:$audio_host_ip:$audio_port"
+
 # screen
 tty_num=$(tty | sed 's/\/dev\/tty\([0-9]\)*/\1/')
 if [[ "$tty_num" =~ ^/.* ]]; then
@@ -29,15 +35,15 @@ if [[ "$tty_num" =~ ^/.* ]]; then
         exit 1
     else
         # nested tty mode
-        printf 'Drivers (blueman, pulseaudio, cups, ...) is not supported on Nested TTY mode.'
+        printf 'Drivers (blueman, cups, ...) is not supported on Nested TTY mode.'
         POD_TTY="127"
         Xephyr -br -ac -noreset -screen 800x600 -listen tcp :$POD_TTY 2>/dev/null &
         screen=$!
     fi
 else
     # tty mode
-    POD_TTY="0"
-    Xorg -listen tcp -nolisten local vt1 2>/dev/null &
+    POD_TTY=$(expr $tty_num - 1)
+    Xorg -listen tcp -nolisten local "vt$tty_num" 2>/dev/null &
     screen=$!
 fi
 
@@ -63,6 +69,7 @@ podman run --detach --rm -it \
     --device "/dev/video1":"/dev/video1":rw \
     --env "POD_DISPLAY=$POD_DISPLAY" \
     --env "POD_XAUTHORITY=$POD_XAUTHORITY" \
+    --env "PULSE_SERVER=$POD_PULSE_SERVER" \
     --group-add "$(getgid audio)" \
     --group-add "$(getgid render)" \
     --group-add "$(getgid video)" \
@@ -78,6 +85,10 @@ podman run --detach --rm -it \
     -- "localhost/kerryeon/archlinux-xfce" >/dev/null
 podman wait xfce >/dev/null 2>/dev/null &
 container=$!
+
+# load audio
+pactl unload-module $audio_id 2>/dev/null || true # unload lastly used module
+audio_id=$(pactl load-module module-native-protocol-tcp port=$audio_port auth-ip-acl=$audio_client_ip)
 
 # Wait until one of them is downed
 echo Waiting until system is downed...
@@ -99,3 +110,6 @@ while true; do
 
     sleep 1
 done
+
+# unload audio
+pactl unload-module $audio_id

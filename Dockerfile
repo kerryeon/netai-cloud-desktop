@@ -43,7 +43,7 @@ RUN useradd --system --create-home $makepkg \
 
 # Create normal user account
 ARG user=user
-RUN useradd $user -m -g users -G wheel -s /bin/zsh \
+RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
   && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
 
 # Configure system
