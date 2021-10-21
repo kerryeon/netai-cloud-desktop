@@ -31,10 +31,14 @@ RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
   && pacman -Qqn | pacman -S --noconfirm --overwrite="*" - \
   && pacman -Sc --noconfirm
 
-# Install yay: AUR package manager
+# Install yay: AUR package manager and cores
 RUN pacman -S --noconfirm \
+  # AUR package manager
   yay \
-  && pacman -Sc --noconfirm
+  # Core
+  shadow \
+  && pacman -Sc --noconfirm \
+  && touch /etc/subuid /etc/subgid
 
 # Configure system
 RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
@@ -76,7 +80,8 @@ RUN systemctl enable pacman-init \
 # Create normal user account
 ARG user=user
 RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
-  && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
+  && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user \
+  && usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $user
 
 # Customize user settings
 USER $user
