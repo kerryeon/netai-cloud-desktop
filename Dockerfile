@@ -95,5 +95,7 @@ RUN sudo chown -R $user:users /home/$user \
 # Initiate with systemd
 USER root
 WORKDIR /tmp
-ENTRYPOINT [ "/sbin/init" ]
-CMD [ "systemctl" ]
+ADD init /usr/local/bin/init
+RUN chmod +x /usr/local/bin/init
+ENTRYPOINT [ "/bin/bash" ]
+CMD [ "/usr/local/bin/init" ]

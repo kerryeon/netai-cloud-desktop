@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Halt commands if an error occured
+set -e
+
 # Disable default compositor
 Configfile="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
 [ -e $Configfile ] || {

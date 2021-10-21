@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Halt commands if an error occured
+set -e
+
 if [ ! -f /etc/pacman.d/gnupg ]; then
     # Generate a default secret key
     pacman-key --init
