@@ -36,16 +36,6 @@ RUN pacman -S --noconfirm \
   yay \
   && pacman -Sc --noconfirm
 
-# Create makepkg user and workdir
-ARG makepkg=makepkg
-RUN useradd --system --create-home $makepkg \
-  && echo "$makepkg ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$makepkg
-
-# Create normal user account
-ARG user=user
-RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
-  && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
-
 # Configure system
 RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
   && sed -i 's/^#\(en_US\.UTF-8.*\)$/\1/g' /etc/locale.gen \
@@ -53,6 +43,11 @@ RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
   && sed -i 's/^#\(ko_KR\.UTF-8.*\)$/\1/g' /etc/locale.gen \
   && locale-gen \
   && ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+
+# Create makepkg user and workdir
+ARG makepkg=makepkg
+RUN useradd --system --create-home $makepkg \
+  && echo "$makepkg ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$makepkg
 
 # Install dependencies
 USER $makepkg
@@ -77,6 +72,11 @@ ADD core/startx.service /etc/systemd/user/
 RUN systemctl enable pacman-init \
   && chmod +x /usr/local/bin/pacman-init \
   && chmod +x /usr/local/bin/startx
+
+# Create normal user account
+ARG user=user
+RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
+  && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
 
 # Customize user settings
 USER $user
