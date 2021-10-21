@@ -11,17 +11,39 @@
 #     -- x11docker/xfce >output 2>outerr
 # exit 1
 
-# get prerequisites
+################################################################################
+# Check dependencies
+################################################################################
+
+# audio
+if [ ! which pipewire ] 2>/dev/null; then
+    echo "pipewire is not installed!"
+    exit 1
+fi
+if [ ! systemctl is-active --user pipewire ]; then
+    echo "pipewire is not running!"
+    exit 1
+fi
+
+# system
 function getgid() {
     name=$1
     cut -d: -f3 < <(getent group $name)
 }
 
-# audio (pipewire)
+################################################################################
+# Prepare modules
+################################################################################
+
+# audio
 audio_client_ip="10.0.2.100"
 audio_host_ip="10.0.2.2"
 audio_port="47130"
 POD_PULSE_SERVER="tcp:$audio_host_ip:$audio_port"
+
+################################################################################
+# Load modules
+################################################################################
 
 # screen
 tty_num=$(tty | sed 's/\/dev\/tty\([0-9]\)*/\1/')
@@ -83,11 +105,14 @@ podman run --detach --rm -it \
 podman wait xfce >/dev/null 2>/dev/null &
 container=$!
 
-# load audio
+# audio
 pactl unload-module $audio_id 2>/dev/null || true # unload lastly used module
 audio_id=$(pactl load-module module-native-protocol-tcp port=$audio_port auth-ip-acl=$audio_client_ip)
 
+################################################################################
 # Wait until one of them is downed
+################################################################################
+
 echo Waiting until system is downed...
 while true; do
     if ! ps $screen >/dev/null; then
@@ -108,5 +133,9 @@ while true; do
     sleep 1
 done
 
-# unload audio
+################################################################################
+# Unload modules
+################################################################################
+
+# audio
 pactl unload-module $audio_id
