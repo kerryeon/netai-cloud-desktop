@@ -90,7 +90,9 @@ RUN sudo chown -R $user:users /home/$user \
   && printf 'export GTK_IM_MODULE="nimf"' >> /home/$user/.zshrc \
   && printf 'export QT4_IM_MODULE="nimf"' >> /home/$user/.zshrc \
   && printf 'export QT_IM_MODULE="nimf"' >> /home/$user/.zshrc \
-  && printf 'export XMODIFIERS="@im=nimf"' >> /home/$user/.zshrc
+  && printf 'export XMODIFIERS="@im=nimf"' >> /home/$user/.zshrc \
+  # xfce settings
+  && xfconf-query -c xfwm4 -p /general/use_compositing -t bool -s false
 
 # Initiate with systemd
 USER root
