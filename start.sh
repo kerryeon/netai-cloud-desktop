@@ -17,6 +17,7 @@
 
 # audio
 if [ ! $(which pipewire) ] 2>/dev/null; then
+    # note: https://askubuntu.com/questions/1339765/replacing-pulseaudio-with-pipewire-in-ubuntu-20-04
     echo "pipewire is not installed!"
     exit 1
 fi
