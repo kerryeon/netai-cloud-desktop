@@ -16,13 +16,12 @@
 ################################################################################
 
 # audio
-if [ ! $(which pipewire) ] 2>/dev/null; then
-    # note: https://askubuntu.com/questions/1339765/replacing-pulseaudio-with-pipewire-in-ubuntu-20-04
-    echo "pipewire is not installed!"
+if [[ ! $(which pipewire || which pulseaudio) ]] 2>/dev/null; then
+    echo "pipewire (pulseaudio) is not installed!"
     exit 1
 fi
-if [ ! $(systemctl is-active --user pipewire) ]; then
-    echo "pipewire is not running!"
+if [[ ! $(systemctl is-active --user pipewire || systemctl is-active --user pulseaudio) ]]; then
+    echo "pipewire (pulseaudio) is not running!"
     exit 1
 fi
 
@@ -37,8 +36,8 @@ function getgid() {
 ################################################################################
 
 # audio
-audio_client_ip="10.0.2.100"
-audio_host_ip="10.0.2.2"
+audio_host_ip="$(ip -4 -o a | awk '{print $4}' | cut -d/ -f1 | grep -v 127.0.0.1 | head -n1)"
+audio_client_ip=$audio_host_ip
 audio_port="47130"
 POD_PULSE_SERVER="tcp:$audio_host_ip:$audio_port"
 
@@ -71,7 +70,7 @@ POD_GATEWAY="10.0.2.2"
 POD_DISPLAY="$POD_GATEWAY:$POD_TTY"
 POD_XAUTHORITY="/X/Xauthority.client"
 
-if [ -z $HOOST_XAUTHORITY ]; then
+if [[ -z $HOOST_XAUTHORITY ]]; then
     HOST_XAUTHORITY="$HOME/.Xauthority"
 fi
 
@@ -113,7 +112,7 @@ podman wait xfce >/dev/null 2>/dev/null &
 container=$!
 
 # audio
-audio_id=$(pactl load-module module-native-protocol-tcp port=$audio_port auth-ip-acl=$audio_client_ip)
+audio_id=$(pactl load-module module-native-protocol-tcp port=$audio_port auth-ip-acl=$audio_client_ip/32)
 
 ################################################################################
 # Wait until one of them is downed
