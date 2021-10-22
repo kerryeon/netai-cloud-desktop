@@ -6,7 +6,8 @@ ARG reflector_country="KR"
 RUN pacman -Sy \
   && pacman -S --needed --noconfirm \
   reflector \
-  && pacman -Sc --noconfirm \
+  && pacman -Scc --noconfirm \
+  && rm -r /var/lib/pacman/sync/* \
   && sed -i "s/\(^# --country.*\$\)/\1\n--country $reflector_country/g" /etc/xdg/reflector/reflector.conf \
   && systemctl enable reflector.timer \
   && reflector --country $reflector_country > /etc/pacman.d/mirrorlist
@@ -19,25 +20,28 @@ RUN printf '\n[archlinuxcn]\nServer = https://repo.archlinuxcn.org/$arch' >> /et
   # refresh database because of changing mirrorlists
   && pacman -Syy \
   # import PGP keys
-  && pacman -S --noconfirm \
+  && pacman -Sy --noconfirm \
   archlinux-keyring \
   archlinuxcn-keyring \
-  && pacman -Sc --noconfirm
+  && pacman -Scc --noconfirm \
+  && rm -r /var/lib/pacman/sync/*
 
 # Reinstall excluded files
 RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
   && rm /etc/locale.gen \
   && pacman -Syy \
   && pacman -Qqn | pacman -S --noconfirm --overwrite="*" - \
-  && pacman -Sc --noconfirm
+  && pacman -Scc --noconfirm \
+  && rm -r /var/lib/pacman/sync/*
 
 # Install yay: AUR package manager and cores
-RUN pacman -S --noconfirm \
+RUN pacman -Sy --noconfirm \
   # AUR package manager
   yay \
   # Core
   shadow \
-  && pacman -Sc --noconfirm \
+  && pacman -Scc --noconfirm \
+  && rm -r /var/lib/pacman/sync/* \
   && touch /etc/subuid /etc/subgid
 
 # Configure system
@@ -57,9 +61,9 @@ RUN useradd --system --create-home $makepkg \
 USER $makepkg
 WORKDIR /tmp
 ADD custom/packages .
-RUN yay -S --needed --noconfirm $(sudo cat packages | grep -o '^[^#]*') \
-  && yay -Sc --noconfirm \
+RUN yay -Sy --needed --noconfirm $(sudo cat packages | grep -o '^[^#]*') \
   && yay -Scc --noconfirm \
+  && sudo rm -r /var/lib/pacman/sync/* \
   && sudo rm packages \
   # remove the default secret key
   # note: manual key generation is required
