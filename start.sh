@@ -64,7 +64,7 @@ if [[ "$tty_num" =~ ^/.* ]]; then
     else
         # nested tty mode
         POD_TTY="127"
-        Xephyr -br -ac -noreset -screen 800x600 -listen tcp :$POD_TTY 2>/dev/null &
+        Xephyr -br -ac -noreset -resizeable -screen 800x600 -listen tcp :$POD_TTY 2>/dev/null &
         screen=$!
     fi
 else
