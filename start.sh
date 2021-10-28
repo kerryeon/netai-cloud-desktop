@@ -41,6 +41,15 @@ audio_client_ip=$audio_host_ip
 audio_port="47130"
 POD_PULSE_SERVER="tcp:$audio_host_ip:$audio_port"
 
+# home directory
+if [ ! -d ./home/ ]; then
+    echo Creating default home directory...
+    cp -r ./custom/home/ ./home/
+    # TODO: check user subuid/subgids
+    # note: uid (user) = 1000, gid (users) = 984
+    sudo chown -R 100999:100983 ./home/
+fi
+
 ################################################################################
 # Load modules
 ################################################################################
@@ -51,7 +60,9 @@ if [[ "$tty_num" =~ ^/.* ]]; then
     if [ -z "$DISPLAY" ]; then
         # pts mode
         echo Not Implement Yet!
-        exit 1
+        POD_TTY=$(expr $tty_num - 1)
+        Xorg -listen tcp -nolisten local "vt$tty_num" 2>/dev/null &
+        screen=$!
     else
         # nested tty mode
         POD_TTY="127"
@@ -70,7 +81,7 @@ POD_GATEWAY="10.0.2.2"
 POD_DISPLAY="$POD_GATEWAY:$POD_TTY"
 POD_XAUTHORITY="/X/Xauthority.client"
 
-if [[ -z $HOOST_XAUTHORITY ]]; then
+if [[ -z $HOST_XAUTHORITY ]]; then
     HOST_XAUTHORITY="$HOME/.Xauthority"
 fi
 
@@ -106,6 +117,7 @@ podman run --detach --rm -it \
     --tmpfs "/run:exec" \
     --tmpfs "/run/lock" \
     --volume "$HOST_XAUTHORITY:$POD_XAUTHORITY:ro" \
+    --volume "`pwd`/home:/home/user/Desktop" \
     --workdir "/tmp" \
     -- "localhost/kerryeon/archlinux-xfce" >/dev/null
 podman wait xfce >/dev/null 2>/dev/null &

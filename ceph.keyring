@@ -1,0 +1,4 @@
+[client.test]
+        key = AQBh/2xhsiAIFRAA9sNuEQRx4N+Pfth3FTy1Aw==
+        caps mon = "allow r"
+        caps osd = "allow rw pool=test"

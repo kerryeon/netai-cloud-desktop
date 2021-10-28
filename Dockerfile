@@ -84,25 +84,16 @@ RUN systemctl enable pacman-init \
 # Create normal user account
 ARG user=user
 RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
-  && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user \
-  && usermod --add-subuids 100000-165535 --add-subgids 100000-165535 $user
+  && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
 
 # Customize user settings
 USER $user
-ADD custom/autostart/ /home/$user/.config/autostart/
 ADD custom/on-startup /usr/local/bin/
-RUN sudo chown -R $user:users /home/$user \
+RUN \
   # Enable starting X
-  && systemctl enable --user startx.service \
+  systemctl enable --user startx.service \
   # settings
-  && sudo chmod +x /usr/local/bin/on-startup \
-  # zsh
-  && cp /usr/share/oh-my-zsh/zshrc /home/$user/.zshrc \
-  # nimf
-  && printf 'export GTK_IM_MODULE="nimf"' >> /home/$user/.zshrc \
-  && printf 'export QT4_IM_MODULE="nimf"' >> /home/$user/.zshrc \
-  && printf 'export QT_IM_MODULE="nimf"' >> /home/$user/.zshrc \
-  && printf 'export XMODIFIERS="@im=nimf"' >> /home/$user/.zshrc
+  && sudo chmod +x /usr/local/bin/on-startup
 
 # Initiate with systemd
 USER root
