@@ -89,11 +89,7 @@ RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
 # Customize user settings
 USER $user
 ADD custom/on-startup /usr/local/bin/
-RUN \
-  # Enable starting X
-  systemctl enable --user startx.service \
-  # settings
-  && sudo chmod +x /usr/local/bin/on-startup
+RUN sudo chmod +x /usr/local/bin/on-startup
 
 # Initiate with systemd
 USER root

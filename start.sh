@@ -60,9 +60,7 @@ if [[ "$tty_num" =~ ^/.* ]]; then
     if [ -z "$DISPLAY" ]; then
         # pts mode
         echo Not Implement Yet!
-        POD_TTY=$(expr $tty_num - 1)
-        Xorg -listen tcp -nolisten local "vt$tty_num" 2>/dev/null &
-        screen=$!
+        exit 1
     else
         # nested tty mode
         POD_TTY="127"
@@ -117,7 +115,7 @@ podman run --detach --rm -it \
     --tmpfs "/run:exec" \
     --tmpfs "/run/lock" \
     --volume "$HOST_XAUTHORITY:$POD_XAUTHORITY:ro" \
-    --volume "`pwd`/home:/home/user/Desktop" \
+    --volume "$(pwd)/home:/home/user/:rw" \
     --workdir "/tmp" \
     -- "localhost/kerryeon/archlinux-xfce" >/dev/null
 podman wait xfce >/dev/null 2>/dev/null &
