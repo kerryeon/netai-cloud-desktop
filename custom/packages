@@ -17,16 +17,22 @@ xfce4-goodies
 # Development Tools
 bash-completion
 cmake
+curl
 oh-my-zsh-git
+openssh
+openssh-askpass
 visual-studio-code-bin
+wget
 zsh
 zsh-completions
+zsh-theme-powerlevel10k-git
 
 # Fonts
 adobe-source-han-sans-kr-fonts
 adobe-source-han-serif-kr-fonts
 noto-fonts-cjk
 ttf-fira-code
+ttf-meslo-nerd-font-powerlevel10k
 
 # Graphics
 ## MESA
