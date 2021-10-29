@@ -21,11 +21,39 @@ curl
 oh-my-zsh-git
 openssh
 openssh-askpass
+vim
 visual-studio-code-bin
 wget
 zsh
 zsh-completions
 zsh-theme-powerlevel10k-git
+
+# Development Language Tools
+## Android & Flutter
+android-studio
+## C/C++
+gcc
+llvm
+## Java
+jdk8-openjdk
+## Node.js
+nodejs
+npm
+## Python
+python
+python-matplotlib
+python-numpy
+python-opencv
+python-pillow
+python-pip
+python-scikit-learn
+python-tqdm
+### Deep Learning
+python-pytorch-cuda
+python-tensorflow-cuda
+tensorboard
+## Rust
+rustup
 
 # Fonts
 adobe-source-han-sans-kr-fonts

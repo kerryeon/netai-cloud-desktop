@@ -115,6 +115,7 @@ podman run --detach --rm -it \
     --tmpfs "/run:exec" \
     --tmpfs "/run/lock" \
     --volume "$HOST_XAUTHORITY:$POD_XAUTHORITY:ro" \
+    --volume "/var/run/libvirt:/var/run/libvirt:rw" \
     --volume "$(pwd)/home:/home/user/:rw" \
     --workdir "/tmp" \
     -- "localhost/kerryeon/archlinux-xfce" >/dev/null
