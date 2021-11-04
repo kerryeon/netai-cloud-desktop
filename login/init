@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Halt commands if an error occured
+set -e
+
+# Start redirect handler
+# TODO: to be implemented
+sleep 10 &
+handler=$!
+
+# Start web browser client
+firefox --kiosk --private-window \
+    https://google.com/ &
+browser=$!
+
+################################################################################
+# Wait until one of them is downed
+################################################################################
+
+echo Waiting until system is downed...
+while true; do
+    if ! ps $browser >/dev/null; then
+        echo Web browser is downed.
+        if [[ "$handler" != "1" ]]; then
+            kill $handler 2>/dev/null
+        fi
+        exec false
+    fi
+
+    if ! ps $handler >/dev/null; then
+        echo Handler is downed.
+        if [[ "$browser" != "1" ]]; then
+            kill $browser 2>/dev/null
+        fi
+        # TODO: to be implemented
+        exec false
+    fi
+
+    sleep 1
+done
