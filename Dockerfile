@@ -1,5 +1,5 @@
 # Select Desktop Environment
-FROM docker.io/archlinux:base-devel
+FROM --platform=linux/x86_64 docker.io/archlinux:base-devel
 
 # Install reflector for faster installation
 ARG reflector_country="KR"

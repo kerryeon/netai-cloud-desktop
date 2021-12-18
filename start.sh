@@ -17,12 +17,10 @@
 
 # audio
 if [[ ! $(which pipewire || which pulseaudio) ]] 2>/dev/null; then
-    echo "pipewire (pulseaudio) is not installed!"
-    exit 1
+    echo "warn: pipewire (pulseaudio) is not installed!"
 fi
 if [[ ! $(systemctl is-active --user pipewire || systemctl is-active --user pulseaudio) ]]; then
-    echo "pipewire (pulseaudio) is not running!"
-    exit 1
+    echo "warn: pipewire (pulseaudio) is not running!"
 fi
 
 # system
@@ -154,4 +152,6 @@ done
 ################################################################################
 
 # audio
-pactl unload-module module-native-protocol-tcp $audio_id
+if [[ $(which pactl) ]] 2>/dev/null; then
+    pactl unload-module module-native-protocol-tcp $audio_id
+fi
