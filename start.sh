@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # bash -x x11docker --desktop \
 #     --backend=podman \
