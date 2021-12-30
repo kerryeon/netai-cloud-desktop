@@ -1,48 +1,12 @@
 # Select Desktop Environment
-FROM --platform=linux/x86_64 docker.io/archlinux:base-devel
+FROM docker.io/ubuntu:20.04
 
-# Install reflector for faster installation
-ARG reflector_country="KR"
-RUN pacman -Sy \
-  && pacman -S --needed --noconfirm \
-  reflector \
-  && pacman -Scc --noconfirm \
-  && rm -r /var/lib/pacman/sync/* \
-  && sed -i "s/\(^# --country.*\$\)/\1\n--country $reflector_country/g" /etc/xdg/reflector/reflector.conf \
-  && systemctl enable reflector.timer \
-  && reflector --country $reflector_country > /etc/pacman.d/mirrorlist
-
-# Add more package repositories
-RUN printf '\n[archlinuxcn]\nServer = https://repo.archlinuxcn.org/$arch' >> /etc/pacman.conf \
-  && printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf \
-  # generate a default secret key
-  && pacman-key --init \
-  # refresh database because of changing mirrorlists
-  && pacman -Syy \
-  # import PGP keys
-  && pacman -Sy --noconfirm \
-  archlinux-keyring \
-  archlinuxcn-keyring \
-  && pacman -Scc --noconfirm \
-  && rm -r /var/lib/pacman/sync/*
-
-# Reinstall excluded files
-RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
-  && rm /etc/locale.gen \
-  && pacman -Syy \
-  && pacman -Qqn | pacman -S --noconfirm --overwrite="*" - \
-  && pacman -Scc --noconfirm \
-  && rm -r /var/lib/pacman/sync/*
-
-# Install yay: AUR package manager and cores
-RUN pacman -Sy --noconfirm \
-  # AUR package manager
-  yay \
-  # Core
-  shadow \
-  && pacman -Scc --noconfirm \
-  && rm -r /var/lib/pacman/sync/* \
-  && touch /etc/subuid /etc/subgid
+# Install core dependencies
+RUN apt-get update \
+  && apt-get install -y \
+    locales \
+    software-properties-common \
+  && apt-get clean
 
 # Configure system
 RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
@@ -52,23 +16,14 @@ RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
   && locale-gen \
   && ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
-# Create makepkg user and workdir
-ARG makepkg=makepkg
-RUN useradd --system --create-home $makepkg \
-  && echo "$makepkg ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$makepkg
-
 # Install dependencies
-USER $makepkg
 WORKDIR /tmp
 ADD custom/packages .
-RUN yay -Sy --needed --noconfirm $(sudo cat packages | grep -o '^[^#]*') \
-  && yay -Scc --noconfirm \
-  && sudo rm -r /var/lib/pacman/sync/* \
-  && sudo rm packages \
-  # remove the default secret key
-  # note: manual key generation is required
-  # ex) pacman-key --init
-  && sudo rm -rf /etc/pacman.d/gnupg
+ADD custom/repos .
+RUN add-apt-repository $(cat repos | grep -o '^[^#]*') \
+  && apt-get update \
+  && apt-get install -y $(cat packages | grep -o '^[^#]*') \
+  && apt-get clean
 
 # Enable systemd
 USER root
