@@ -78,6 +78,7 @@ else
 fi
 
 # container
+POD_NAME="netai-cloud-desktop"
 POD_GATEWAY="10.0.2.2"
 POD_DISPLAY="$POD_GATEWAY:$POD_TTY"
 POD_XAUTHORITY="/X/Xauthority.client"
@@ -110,7 +111,7 @@ podman run --detach --rm -it \
     --group-add "$(getgid audio)" \
     --group-add "$(getgid render)" \
     --group-add "$(getgid video)" \
-    --name "xfce" \
+    --name "$POD_NAME" \
     --net "slirp4netns:allow_host_loopback=true" \
     --security-opt "label=type:container_runtime_t" \
     --stop-signal "SIGRTMIN+3" \
@@ -122,7 +123,7 @@ podman run --detach --rm -it \
     --volume "$(pwd)/home:/home/user/:rw" \
     --workdir "/tmp" \
     -- "localhost/kerryeon/netai-cloud-desktop" >/dev/null
-podman wait xfce >/dev/null 2>/dev/null &
+podman wait "$POD_NAME" >/dev/null 2>/dev/null &
 container=$!
 
 # audio
