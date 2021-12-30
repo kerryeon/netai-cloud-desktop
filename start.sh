@@ -25,9 +25,13 @@ if [[ ! $(systemctl is-active --user pipewire || systemctl is-active --user puls
 fi
 
 # system
+function getuid() {
+    cat /etc/subuid | grep "^$(whoami):" | cut -d: -f2
+}
+
 function getgid() {
     name=$1
-    cut -d: -f3 < <(getent group $name)
+    getent group $name | cut -d: -f3
 }
 
 ################################################################################
@@ -46,7 +50,7 @@ if [ ! -d ./home/ ]; then
     cp -r ./custom/home/ ./home/
     # TODO: check user subuid/subgids
     # note: uid (user) = 1000, gid (users) = 984
-    sudo chown -R 100999:100983 ./home/
+    sudo chown -R $(($(getuid) + 999)):$(($(getuid) + 983)) ./home/
 fi
 
 ################################################################################
@@ -117,12 +121,14 @@ podman run --detach --rm -it \
     --volume "/var/run/libvirt:/var/run/libvirt:rw" \
     --volume "$(pwd)/home:/home/user/:rw" \
     --workdir "/tmp" \
-    -- "localhost/kerryeon/archlinux-xfce" >/dev/null
+    -- "localhost/kerryeon/netai-cloud-desktop" >/dev/null
 podman wait xfce >/dev/null 2>/dev/null &
 container=$!
 
 # audio
-audio_id=$(pactl load-module module-native-protocol-tcp port=$audio_port auth-ip-acl=$audio_client_ip/32)
+if [[ $(which pactl) ]] 2>/dev/null; then
+    audio_id=$(pactl load-module module-native-protocol-tcp port=$audio_port auth-ip-acl=$audio_client_ip/32)
+fi
 
 ################################################################################
 # Wait until one of them is downed
