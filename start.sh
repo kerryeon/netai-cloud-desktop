@@ -139,7 +139,7 @@ echo Waiting until system is downed...
 while true; do
     if ! ps $screen >/dev/null; then
         echo Screen is downed.
-        podman stop xfce >/dev/null 2>/dev/null
+        podman stop "$POD_NAME" >/dev/null 2>/dev/null
         wait $container
         break
     fi
