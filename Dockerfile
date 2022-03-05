@@ -11,7 +11,7 @@ RUN if cat /etc/pacman.conf | grep "auto" > /dev/null; then \
   # Install reflector for faster installation
   pacman -Sy \
   && pacman -S --needed --noconfirm \
-  reflector \
+  reflector systemd \
   && pacman -Scc --noconfirm \
   && rm -r /var/lib/pacman/sync/* \
   && sed -i "s/\(^# --country.*\$\)/\1\n--country $reflector_country/g" /etc/xdg/reflector/reflector.conf \
