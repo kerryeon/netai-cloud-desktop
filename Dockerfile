@@ -71,7 +71,7 @@ RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
 ARG makepkg=makepkg
 RUN useradd --system --create-home $makepkg \
   && printf "$makepkg ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$makepkg \
-  && printf 'Defaults env_keep += "ftp_proxy http_proxy https_proxy no_proxy"' > /etc/sudoers.d/proxy
+  && printf 'Defaults env_keep += "FTP_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY"' > /etc/sudoers.d/proxy
 USER $makepkg
 WORKDIR /tmp
 
