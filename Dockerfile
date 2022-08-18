@@ -77,10 +77,10 @@ WORKDIR /tmp
 # Install dependencies
 ADD packages/ ./packages/
 RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
+  && sudo -E pacman -Sy \
   # Install 3rdparty package: yay-bin
   && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" | tar xzf - \
   && pushd "yay" \
-  && sudo -E pacman -Sy \
   && makepkg -scri --noconfirm \
   && popd \
   && rm -rf "yay" "yay.tar.gz" \
