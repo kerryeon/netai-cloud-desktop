@@ -36,7 +36,6 @@ RUN if cat /etc/pacman.conf | grep "auto" > /dev/null; then \
 RUN printf '\n[archlinuxcn]\nServer = https://repo.archlinuxcn.org/$arch' >> /etc/pacman.conf \
   # use proxy for importing PGP keys
   && printf "keyserver-options http-proxy=${http_proxy}\n" >> /etc/pacman.d/gnupg/gpg.conf \
-  && printf "keyserver-options https-proxy=${https_proxy}\n" >> /etc/pacman.d/gnupg/gpg.conf \
   # generate a default secret key
   && pacman-key --init \
   # refresh database because of changing mirrorlists
