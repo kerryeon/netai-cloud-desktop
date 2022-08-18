@@ -1,0 +1,25 @@
+From 469dfa5a48afb4bcf0ec278734d305af4da231f2 Mon Sep 17 00:00:00 2001
+From: Ho Kim <ho.kim@ulagbulag.io>
+Date: Thu, 18 Aug 2022 11:17:32 +0000
+Subject: [PATCH] Add support building without strict mode
+
+---
+ PKGBUILD | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/PKGBUILD b/PKGBUILD
+index bbffb9a..e70aba5 100644
+--- a/PKGBUILD
++++ b/PKGBUILD
+@@ -133,7 +133,7 @@ pkgver() {
+ 
+ build() {
+   cd "$srcdir/$_pkgname"
+-  python setup.py build
++  python setup.py build --without-strict
+ }
+ 
+ package() {
+-- 
+2.34.1
+

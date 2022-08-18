@@ -89,12 +89,18 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   && makepkg -scri --noconfirm \
   && popd \
   && sudo rm -rf "nvidia-sdk" "nvidia-sdk.tar.gz" \
-  && ls -al /usr/include/nvidia-sdk \
-  && ls -al /usr/lib/ \
   # Others
   && /bin/bash ./packages/install.sh ./packages/common \
   && /bin/bash ./packages/install.sh ./packages/graphics \
   && /bin/bash ./packages/install.sh ./packages/xpra \
+  # Install 3rdparty package: xpra-git
+  && wget "https://aur.archlinux.org/cgit/aur.git/snapshot/xpra-git.tar.gz" \
+  && tar xf "xpra-git.tar.gz" \
+  && pushd "xpra-git" \
+  && patch < ../packages/patches/0001-Add-support-building-without-strict-mode.patch \
+  && makepkg -scri --noconfirm \
+  && popd \
+  && sudo rm -rf "xpra-git" "nvidia-sdk.tar.gz" \
   && /bin/bash ./packages/install.sh ./packages/applications \
   # Cleanup
   && yay -Scc --noconfirm \

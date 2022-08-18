@@ -1,9 +1,3 @@
-# Audio
-pavucontrol
-pipewire
-pipewire-alsa
-pipewire-pulse
-
 # Development Tools
 oh-my-zsh-git
 openssh
@@ -26,22 +20,6 @@ adobe-source-han-serif-kr-fonts
 noto-fonts-cjk
 ttf-fira-code
 ttf-meslo-nerd-font-powerlevel10k
-
-# Graphics
-## General & MESA
-#lib32-mesa
-libva-mesa-driver
-mesa
-mesa-demos
-mesa-utils
-mesa-vdpau
-xf86-video-fbdev
-## NVIDIA
-libva-vdpau-driver
-nvidia-utils
-nvidia-sdk
-python-pycuda
-python-pynvml
 
 # Web browser
 google-chrome
