@@ -80,7 +80,7 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   # Install 3rdparty package: yay-bin
   && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" | tar xzf - \
   && pushd "yay" \
-  && sudo pacman -Sy \
+  && sudo -E pacman -Sy \
   && makepkg -scri --noconfirm \
   && popd \
   && rm -rf "yay" "yay.tar.gz" \
