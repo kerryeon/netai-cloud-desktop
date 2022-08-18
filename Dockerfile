@@ -35,7 +35,9 @@ RUN if cat /etc/pacman.conf | grep "auto" > /dev/null; then \
 # Add more package repositories
 RUN printf '\n[archlinuxcn]\nServer = https://repo.archlinuxcn.org/$arch' >> /etc/pacman.conf \
   # use proxy for importing PGP keys
-  && printf "keyserver-options http-proxy=${http_proxy}\n" >> /etc/pacman.d/gnupg/gpg.conf \
+  && mkdir /etc/gnupg/ \
+  && printf "keyserver-options http-proxy=${http_proxy}\n" >> /etc/gnupg/dirmngr.conf \
+  && printf "keyserver-options http-proxy=${http_proxy}\n" >> /etc/pacman.d/gnupg/dirmngr.conf \
   # generate a default secret key
   && pacman-key --init \
   # refresh database because of changing mirrorlists
@@ -142,9 +144,12 @@ RUN true \
   && rm -r ./core/
 
 # Delete makepkg user and workdir
-RUN sudo userdel $makepkg \
-  && sudo rm /etc/sudoers.d/$makepkg \
-  && sudo rm -rf /tmp/**/*
+RUN userdel $makepkg \
+  && rm /etc/sudoers.d/$makepkg \
+  && rm -rf /tmp/**/* \
+  # Remove proxy settings
+  && sed -i 's/^keyserver-options http-proxy\=.+$//g' /etc/gnupg/dirmngr.conf \
+  && sed -i 's/^keyserver-options http-proxy\=.+$//g' /etc/pacman.d/gnupg/dirmngr.conf
 
 # Initiate with systemd
 WORKDIR /tmp
