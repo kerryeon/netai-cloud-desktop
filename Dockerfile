@@ -3,7 +3,7 @@ FROM docker.io/lopsided/archlinux:devel
 
 # Configure environment variables
 ENV \
-  NO_PROXY=0,1,2,3,4,5,6,7,8,9,.netai-cloud,localhost,localdomain \
+  no_proxy=0,1,2,3,4,5,6,7,8,9,.netai-cloud,localhost,localdomain \
   __GLX_VENDOR_LIBRARY_NAME=nvidia \
   __NV_PRIME_RENDER_OFFLOAD=1 \
   __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
@@ -34,6 +34,8 @@ RUN if cat /etc/pacman.conf | grep "auto" > /dev/null; then \
 
 # Add more package repositories
 RUN printf '\n[archlinuxcn]\nServer = https://repo.archlinuxcn.org/$arch' >> /etc/pacman.conf \
+  # use proxy for importing PGP keys
+  && printf 'keyserver-options http-proxy\n' >> /etc/pacman.d/gnupg/gpg.conf \
   # generate a default secret key
   && pacman-key --init \
   # refresh database because of changing mirrorlists
@@ -71,7 +73,7 @@ RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
 ARG makepkg=makepkg
 RUN useradd --system --create-home $makepkg \
   && printf "$makepkg ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$makepkg \
-  && printf 'Defaults env_keep += "FTP_PROXY HTTP_PROXY HTTPS_PROXY NO_PROXY"' > /etc/sudoers.d/proxy
+  && printf 'Defaults env_keep += "ftp_proxy http_proxy https_proxy no_proxy"' > /etc/sudoers.d/proxy
 USER $makepkg
 WORKDIR /tmp
 
@@ -114,28 +116,30 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   && sudo rm -r /var/lib/pacman/sync/* \
   && sudo rm -r ./packages
 
-# Enable systemd
+# Create normal user account
 USER root
+ARG user=user
+RUN useradd $user -u 1000 -m -g users -s /bin/zsh \
+  && printf "$user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
+
+# Enable systemd
 ADD ./core ./core
 RUN true \
+  && mkdir -p /etc/conf.d/ \
+  && mkdir -p /etc/systemd/system/console-getty.service.d/ \
   && mv ./core/init /usr/local/bin/init \
   && mv ./core/profile.d/* /etc/profile.d/ \
   && mv ./core/systemd/getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf \
   && mv ./core/systemd/pacman-init /usr/local/bin/ \
   && mv ./core/systemd/pacman-init.service /etc/systemd/system/ \
   && mv ./core/systemd/xpra.conf /etc/conf.d/xpra \
-  && mv ./core/systemd/xpra@.service /etc/systemd/user/ \
-  && chmod a+x /core/profile.d/*.sh \
+  && mv ./core/systemd/xpra@.service /etc/systemd/system/ \
+  && chmod a+x /etc/profile.d/*.sh \
   && chmod +x /usr/local/bin/init \
   && chmod +x /usr/local/bin/pacman-init \
   && systemctl enable pacman-init \
-  && systemctl xpra@user \
+  && systemctl enable xpra@$user \
   && rm -r ./core/
-
-# Create normal user account
-ARG user=user
-RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
-  && printf "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
 
 # Delete makepkg user and workdir
 RUN sudo userdel $makepkg \
