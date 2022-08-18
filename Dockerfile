@@ -70,14 +70,15 @@ RUN printf 'LANG=en_US.UTF-8' > /etc/locale.conf \
 # Create makepkg user and workdir
 ARG makepkg=makepkg
 RUN useradd --system --create-home $makepkg \
-  && echo "$makepkg ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$makepkg
+  && printf "$makepkg ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/$makepkg \
+  && printf 'Defaults env_keep += "ftp_proxy http_proxy https_proxy no_proxy"' > /etc/sudoers.d/proxy
 USER $makepkg
 WORKDIR /tmp
 
 # Install dependencies
 ADD packages/ ./packages/
 RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
-  && sudo -E pacman -Sy \
+  && sudo pacman -Sy \
   # Install 3rdparty package: yay-bin
   && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" | tar xzf - \
   && pushd "yay" \
@@ -134,7 +135,7 @@ RUN true \
 # Create normal user account
 ARG user=user
 RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
-  && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
+  && printf "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
 
 # Delete makepkg user and workdir
 RUN sudo userdel $makepkg \
