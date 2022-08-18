@@ -35,7 +35,7 @@ RUN if cat /etc/pacman.conf | grep "auto" > /dev/null; then \
 # Add more package repositories
 RUN printf '\n[archlinuxcn]\nServer = https://repo.archlinuxcn.org/$arch' >> /etc/pacman.conf \
   # use proxy for importing PGP keys
-  && sed -i 's/^keyserver .+$/keyserver hkp\:\/\/keyserver.ubuntu.com/g' /etc/pacman.d/gnupg/gpg.conf \
+  && printf "keyserver hkp://keyserver.ubuntu.com:80\n" >> /etc/pacman.d/gnupg/gpg.conf \
   && printf "keyserver-options http-proxy=${http_proxy}\n" >> /etc/pacman.d/gnupg/gpg.conf \
   # generate a default secret key
   && pacman-key --init \
