@@ -99,15 +99,12 @@ fi
 # --device "/dev/video1":"/dev/video1":rw \
 # --user "$(id -u $USER):$(id -g $USER)" \
 # --userns="keep-id" \
+# --systemd="always" \
 # --privileged \
 # --volume "rbd0:/home/user/Documents" \
-podman run --detach --rm -it \
+podman run --detach --rm \
     --cap-add "all" \
-    --device "/dev/dri":"/dev/dri":rw \
     --device "/dev/vga_arbiter":"/dev/vga_arbiter":rw \
-    --env "POD_DISPLAY=$POD_DISPLAY" \
-    --env "POD_PULSE_SERVER=$POD_PULSE_SERVER" \
-    --env "POD_XAUTHORITY=$POD_XAUTHORITY" \
     --group-add "$(getgid audio)" \
     --group-add "$(getgid render)" \
     --group-add "$(getgid video)" \
@@ -115,12 +112,9 @@ podman run --detach --rm -it \
     --net "slirp4netns:allow_host_loopback=true" \
     --security-opt "label=type:container_runtime_t" \
     --stop-signal "SIGRTMIN+3" \
-    --systemd="always" \
     --tmpfs "/run:exec" \
     --tmpfs "/run/lock" \
-    --volume "$HOST_XAUTHORITY:$POD_XAUTHORITY:ro" \
-    --volume "/var/run/libvirt:/var/run/libvirt:rw" \
-    --volume "$(pwd)/home:/home/user/:rw" \
+    --volume "/sys/fs/cgroup:/sys/fs/cgroup:ro" \
     --workdir "/tmp" \
     -- "localhost/kerryeon/netai-cloud-desktop" >/dev/null
 podman wait "$POD_NAME" >/dev/null 2>/dev/null &

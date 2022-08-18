@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# Halt commands if an error occured
-set -e
-
-exec startxfce4

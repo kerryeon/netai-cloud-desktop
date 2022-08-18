@@ -1,2 +1,5 @@
-# output
-/home
+# Editor
+/.vscode/
+
+# Non-free Packages
+/packages/nonfree/*.zip

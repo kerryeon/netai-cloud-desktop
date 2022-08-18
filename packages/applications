@@ -1,0 +1,48 @@
+# Audio
+pavucontrol
+pipewire
+pipewire-alsa
+pipewire-pulse
+
+# Development Tools
+oh-my-zsh-git
+openssh
+vim
+visual-studio-code-bin
+zsh
+zsh-completions
+zsh-theme-powerlevel10k-git
+
+# Development Language Tools
+## Java
+jdk8-openjdk
+## Node.js
+nodejs
+npm
+
+# Fonts
+adobe-source-han-sans-kr-fonts
+adobe-source-han-serif-kr-fonts
+noto-fonts-cjk
+ttf-fira-code
+ttf-meslo-nerd-font-powerlevel10k
+
+# Graphics
+## General & MESA
+#lib32-mesa
+libva-mesa-driver
+mesa
+mesa-demos
+mesa-utils
+mesa-vdpau
+xf86-video-fbdev
+## NVIDIA
+libva-vdpau-driver
+nvidia-utils
+nvidia-sdk
+python-pycuda
+python-pynvml
+
+# Web browser
+google-chrome
+firefox

@@ -1,6 +1,8 @@
 # Select Desktop Environment
 FROM docker.io/lopsided/archlinux:devel
 
+# Configure environment variables
+
 # Configure pacman
 RUN sed -i 's/^#\(ParallelDownloads.*\)$/\1/g' /etc/pacman.conf
 
@@ -11,7 +13,7 @@ RUN if cat /etc/pacman.conf | grep "auto" > /dev/null; then \
   # Install reflector for faster installation
   pacman -Sy \
   && pacman -S --needed --noconfirm \
-  reflector systemd \
+  glibc reflector systemd \
   && pacman -Scc --noconfirm \
   && rm -r /var/lib/pacman/sync/* \
   && sed -i "s/\(^# --country.*\$\)/\1\n--country $reflector_country/g" /etc/xdg/reflector/reflector.conf \
@@ -70,43 +72,57 @@ WORKDIR /tmp
 # Install yay: AUR package manager and cores
 RUN wget "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" \
   && tar xf "yay.tar.gz" \
-  && pushd yay \
+  && pushd "yay" \
   && sudo pacman -Sy \
   && makepkg -scri --noconfirm \
   && popd \
-  && rm -rf yay "yay.tar.gz"
+  && rm -rf "yay" "yay.tar.gz"
 
 # Install dependencies
-ADD custom/packages .
-RUN yay -Sy --needed --noconfirm $(sudo cat packages | grep -o '^[^#]*') \
+ADD packages/ ./packages/
+RUN sudo chown $makepkg ./packages/nonfree/* \
+  # Install 3rdparty package: nvidia-sdk
+  && wget "https://aur.archlinux.org/cgit/aur.git/snapshot/nvidia-sdk.tar.gz" \
+  && tar xf "nvidia-sdk.tar.gz" \
+  && pushd "nvidia-sdk" \
+  && sudo mv ../packages/nonfree/Video_Codec_SDK_*.zip . \
+  && makepkg -scri --noconfirm \
+  && popd \
+  && sudo rm -rf "nvidia-sdk" "nvidia-sdk.tar.gz" \
+  # Others
+  && /bin/bash ./packages/install.sh ./packages/common \
+  && /bin/bash ./packages/install.sh ./packages/graphics \
+  && /bin/bash ./packages/install.sh ./packages/xpra \
+  && /bin/bash ./packages/install.sh ./packages/applications \
+  # Cleanup
   && yay -Scc --noconfirm \
-  && sudo rm -r /var/lib/pacman/sync/* \
-  && sudo rm packages \
   # remove the default secret key
   # note: manual key generation is required
   # ex) pacman-key --init
-  && sudo rm -rf /etc/pacman.d/gnupg
+  && sudo rm -rf /etc/pacman.d/gnupg \
+  && sudo rm -r /var/lib/pacman/sync/* \
+  && sudo rm -r ./packages
 
 # Enable systemd
 USER root
-ADD core/getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf
-ADD core/pacman-init /usr/local/bin/
-ADD core/pacman-init.service /etc/systemd/system/
-ADD custom/startx /usr/local/bin/
-ADD core/startx.service /etc/systemd/user/
+ADD core/systemd/getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf
+ADD core/systemd/pacman-init /usr/local/bin/
+ADD core/systemd/pacman-init.service /etc/systemd/system/
+ADD core/systemd/xpra.conf /etc/conf.d/xpra
+ADD core/systemd/xpra@.service /etc/systemd/user/
 RUN systemctl enable pacman-init \
-  && chmod +x /usr/local/bin/pacman-init \
-  && chmod +x /usr/local/bin/startx
+  && systemctl enable xpra@user \
+  && chmod +x /usr/local/bin/pacman-init
+
+# Update environment variables
+USER root
+ADD core/profile.d/ /etc/profile.d/
+RUN chmod a+x /core/profile.d/*.sh
 
 # Create normal user account
 ARG user=user
 RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
   && echo "%wheel ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user
-
-# Customize user settings
-USER $user
-ADD custom/on-startup /usr/local/bin/
-RUN sudo chmod +x /usr/local/bin/on-startup
 
 # Delete makepkg user and workdir
 RUN sudo userdel $makepkg \

@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# Halt commands if an error occured
-set -e
-
-# xfce settings
-xfconf-query -c xfwm4 -p /general/use_compositing -t bool -s false

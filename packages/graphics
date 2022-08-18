@@ -1,0 +1,15 @@
+# General & MESA
+#lib32-mesa
+libva-mesa-driver
+mesa
+mesa-demos
+mesa-utils
+mesa-vdpau
+xf86-video-fbdev
+
+# NVIDIA
+libva-vdpau-driver
+nvidia-utils
+python-pycuda
+python-pynvml
+vulkan-tools

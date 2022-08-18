@@ -4,15 +4,7 @@
 set -e
 
 # Set environment variables
-POD_XAUTHORITY=$(echo $POD_XAUTHORITY | sed 's;/;\\/;g')
-
-# audio
-sed -i "s/^; \(default-server =\).*$/\1 $POD_PULSE_SERVER/g" /etc/pulse/client.conf
-
-# startx
-sed -i "s/^\(Environment=DISPLAY=\).*$/\1$POD_DISPLAY/g" /etc/systemd/user/startx.service
-sed -i "s/^\(Environment=XAUTHORITY=\).*$/\1$POD_XAUTHORITY/g" /etc/systemd/user/startx.service
-su user -c "systemctl enable --user startx"
+source /etc/profile
 
 # Initiate with systemctl
 exec /sbin/init /sbin/systemctl
