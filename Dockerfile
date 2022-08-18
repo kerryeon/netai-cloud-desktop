@@ -102,7 +102,7 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   && patch < ../packages/patches/0001-Add-support-building-without-strict-mode.patch \
   && makepkg -scri --noconfirm \
   && popd \
-  && sudo rm -rf "xpra-git" "nvidia-sdk.tar.gz" \
+  && sudo rm -rf "xpra-git" "xpra-git.tar.gz" \
   # Install packages: Applications
   && /bin/bash ./packages/install.sh ./packages/applications \
   # Cleanup
