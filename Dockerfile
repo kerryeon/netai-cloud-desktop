@@ -3,8 +3,6 @@ FROM docker.io/lopsided/archlinux:devel
 
 # Configure environment variables
 ENV \
-  HTTP_PROXY=${HTTP_PROXY} \
-  HTTPS_PROXY=${HTTPS_PROXY} \
   NO_PROXY=0,1,2,3,4,5,6,7,8,9,.netai-cloud,localhost,localdomain \
   __GLX_VENDOR_LIBRARY_NAME=nvidia \
   __NV_PRIME_RENDER_OFFLOAD=1 \
@@ -76,17 +74,16 @@ RUN useradd --system --create-home $makepkg \
 USER $makepkg
 WORKDIR /tmp
 
-# Install yay: AUR package manager and cores
-RUN curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" | tar xzf - \
+# Install dependencies
+ADD packages/ ./packages/
+RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
+  # Install 3rdparty package: yay-bin
+  && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" | tar xzf - \
   && pushd "yay" \
   && sudo pacman -Sy \
   && makepkg -scri --noconfirm \
   && popd \
-  && rm -rf "yay" "yay.tar.gz"
-
-# Install dependencies
-ADD packages/ ./packages/
-RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
+  && rm -rf "yay" "yay.tar.gz" \
   # Install 3rdparty package: nvidia-sdk
   && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/nvidia-sdk.tar.gz" | tar xzf - \
   && pushd "nvidia-sdk" \
@@ -94,7 +91,7 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   && makepkg -scri --noconfirm \
   && popd \
   && sudo rm -rf "nvidia-sdk" "nvidia-sdk.tar.gz" \
-  # Others
+  # Install packages: Common, Graphics, Xpra
   && /bin/bash ./packages/install.sh ./packages/common \
   && /bin/bash ./packages/install.sh ./packages/graphics \
   && /bin/bash ./packages/install.sh ./packages/xpra \
@@ -105,6 +102,7 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   && makepkg -scri --noconfirm \
   && popd \
   && sudo rm -rf "xpra-git" "nvidia-sdk.tar.gz" \
+  # Install packages: Applications
   && /bin/bash ./packages/install.sh ./packages/applications \
   # Cleanup
   && yay -Scc --noconfirm \
@@ -117,7 +115,7 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
 
 # Enable systemd
 USER root
-ADD ./core .
+ADD ./core ./core
 RUN true \
   && mv ./core/init /usr/local/bin/init \
   && mv ./core/profile.d/* /etc/profile.d/ \
