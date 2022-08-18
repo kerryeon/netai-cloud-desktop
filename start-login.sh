@@ -37,7 +37,7 @@ POD_GATEWAY="10.0.2.2"
 POD_DISPLAY="$POD_GATEWAY:$POD_TTY"
 
 podman run --detach --rm -it \
-    --env "DISPLAY=203.237.53.30:127" \
+    --env "DISPLAY=127.0.0.1:127" \
     --name "login" \
     "localhost/kerryeon/archlinux-xfce-login"
 podman wait login >/dev/null 2>/dev/null &
