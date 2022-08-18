@@ -139,6 +139,7 @@ RUN useradd $user -u 1000 -m -g users -G wheel -s /bin/zsh \
 
 # Delete makepkg user and workdir
 RUN sudo userdel $makepkg \
+  && sudo rm /etc/sudoers.d/$makepkg \
   && sudo rm -rf /tmp/**/*
 
 # Initiate with systemd
