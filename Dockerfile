@@ -70,8 +70,7 @@ USER $makepkg
 WORKDIR /tmp
 
 # Install yay: AUR package manager and cores
-RUN wget "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" \
-  && tar xf "yay.tar.gz" \
+RUN curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" | tar xzf - \
   && pushd "yay" \
   && sudo pacman -Sy \
   && makepkg -scri --noconfirm \
@@ -82,8 +81,7 @@ RUN wget "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" \
 ADD packages/ ./packages/
 RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   # Install 3rdparty package: nvidia-sdk
-  && wget "https://aur.archlinux.org/cgit/aur.git/snapshot/nvidia-sdk.tar.gz" \
-  && tar xf "nvidia-sdk.tar.gz" \
+  && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/nvidia-sdk.tar.gz" | tar xzf - \
   && pushd "nvidia-sdk" \
   && sudo mv ../packages/nonfree/Video_Codec_SDK_*.zip . \
   && makepkg -scri --noconfirm \
@@ -94,8 +92,7 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   && /bin/bash ./packages/install.sh ./packages/graphics \
   && /bin/bash ./packages/install.sh ./packages/xpra \
   # Install 3rdparty package: xpra-git
-  && wget "https://aur.archlinux.org/cgit/aur.git/snapshot/xpra-git.tar.gz" \
-  && tar xf "xpra-git.tar.gz" \
+  && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/xpra-git.tar.gz" | tar xzf - \
   && pushd "xpra-git" \
   && patch < ../packages/patches/0001-Add-support-building-without-strict-mode.patch \
   && makepkg -scri --noconfirm \
