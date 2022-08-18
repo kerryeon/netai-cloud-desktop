@@ -80,7 +80,7 @@ RUN wget "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" \
 
 # Install dependencies
 ADD packages/ ./packages/
-RUN sudo chown $makepkg ./packages/nonfree/* \
+RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   # Install 3rdparty package: nvidia-sdk
   && wget "https://aur.archlinux.org/cgit/aur.git/snapshot/nvidia-sdk.tar.gz" \
   && tar xf "nvidia-sdk.tar.gz" \
@@ -89,6 +89,8 @@ RUN sudo chown $makepkg ./packages/nonfree/* \
   && makepkg -scri --noconfirm \
   && popd \
   && sudo rm -rf "nvidia-sdk" "nvidia-sdk.tar.gz" \
+  && ls -al /usr/include/nvidia-sdk \
+  && ls -al /usr/lib/ \
   # Others
   && /bin/bash ./packages/install.sh ./packages/common \
   && /bin/bash ./packages/install.sh ./packages/graphics \
@@ -105,19 +107,19 @@ RUN sudo chown $makepkg ./packages/nonfree/* \
 
 # Enable systemd
 USER root
-ADD core/systemd/getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf
-ADD core/systemd/pacman-init /usr/local/bin/
-ADD core/systemd/pacman-init.service /etc/systemd/system/
-ADD core/systemd/xpra.conf /etc/conf.d/xpra
-ADD core/systemd/xpra@.service /etc/systemd/user/
-RUN systemctl enable pacman-init \
-  && systemctl enable xpra@user \
-  && chmod +x /usr/local/bin/pacman-init
-
-# Update environment variables
-USER root
-ADD core/profile.d/ /etc/profile.d/
-RUN chmod a+x /core/profile.d/*.sh
+ADD ./core .
+RUN true \
+  && mv ./core/profile.d/* /etc/profile.d/ \
+  && mv ./core/systemd/getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf \
+  && mv ./core/systemd/pacman-init /usr/local/bin/ \
+  && mv ./core/systemd/pacman-init.service /etc/systemd/system/ \
+  && mv ./core/systemd/xpra.conf /etc/conf.d/xpra \
+  && mv ./core/systemd/xpra@.service /etc/systemd/user/ \
+  && chmod a+x /core/profile.d/*.sh \
+  && chmod +x /usr/local/bin/pacman-init \
+  && systemctl enable pacman-init \
+  && systemctl xpra@user \
+  && rm -r ./core/
 
 # Create normal user account
 ARG user=user

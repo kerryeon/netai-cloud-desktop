@@ -3,3 +3,6 @@
 
 # Non-free Packages
 /packages/nonfree/*.zip
+
+# Temporary files
+**/nohup.out
