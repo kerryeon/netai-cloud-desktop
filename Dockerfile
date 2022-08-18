@@ -115,6 +115,7 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
 USER root
 ADD ./core .
 RUN true \
+  && mv ./core/init /usr/local/bin/init \
   && mv ./core/profile.d/* /etc/profile.d/ \
   && mv ./core/systemd/getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf \
   && mv ./core/systemd/pacman-init /usr/local/bin/ \
@@ -122,6 +123,7 @@ RUN true \
   && mv ./core/systemd/xpra.conf /etc/conf.d/xpra \
   && mv ./core/systemd/xpra@.service /etc/systemd/user/ \
   && chmod a+x /core/profile.d/*.sh \
+  && chmod +x /usr/local/bin/init \
   && chmod +x /usr/local/bin/pacman-init \
   && systemctl enable pacman-init \
   && systemctl xpra@user \
@@ -137,9 +139,6 @@ RUN sudo userdel $makepkg \
   && sudo rm -rf /tmp/**/*
 
 # Initiate with systemd
-USER root
 WORKDIR /tmp
-ADD core/init /usr/local/bin/init
-RUN chmod +x /usr/local/bin/init
 ENTRYPOINT [ "/bin/bash" ]
 CMD [ "/usr/local/bin/init" ]
