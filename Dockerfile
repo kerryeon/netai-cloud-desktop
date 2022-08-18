@@ -6,8 +6,8 @@ ENV \
   HTTP_PROXY=${HTTP_PROXY} \
   HTTPS_PROXY=${HTTPS_PROXY} \
   NO_PROXY=0,1,2,3,4,5,6,7,8,9,.netai-cloud,localhost,localdomain \
-  __NV_PRIME_RENDER_OFFLOAD=1 \
   __GLX_VENDOR_LIBRARY_NAME=nvidia \
+  __NV_PRIME_RENDER_OFFLOAD=1 \
   __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
 
 # Configure pacman
