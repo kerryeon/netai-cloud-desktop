@@ -8,19 +8,22 @@ ARG __GRAPHICS_NVIDIA_VERSION=510
 # Configure environment variables
 ENV \
   __GRAPHICS_VENDOR_NAME="${__GRAPHICS_VENDOR_NAME}" \
+  __GRAPHICS_NVIDIA_HOME="/usr/local/nvidia" \
   __GRAPHICS_NVIDIA_VERSION="${__GRAPHICS_NVIDIA_VERSION}"
 
 # Configure constant environment variables
 ENV \
   no_proxy="0,1,2,3,4,5,6,7,8,9,.netai-cloud,localhost,localdomain" \
+  LD_LIBRARY_PATH="${__GRAPHICS_NVIDIA_HOME}/lib:${LD_LIBRARY_PATH}" \
+  PATH="${__GRAPHICS_NVIDIA_HOME}/bin:${PATH}" \
   __GLX_VENDOR_LIBRARY_NAME="${__GRAPHICS_VENDOR_NAME}" \
   __NV_PRIME_RENDER_OFFLOAD="1" \
   __NV_PRIME_RENDER_OFFLOAD_PROVIDER="NVIDIA-G0"
 
 # Check environment variables
 RUN case "${__GRAPHICS_VENDOR_NAME}" in \
-  "") echo "No GPU vendors (Without H/W Acceleration)" && exit 0 ;; \
-  "nvidia") echo "Supported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}:${__GRAPHICS_NVIDIA_VERSION}" && exit 0 ;; \
+  "") echo "No GPU vendors (Without H/W Acceleration)" ;; \
+  "nvidia") echo "Supported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}:${__GRAPHICS_NVIDIA_VERSION}" ;; \
   *) echo "Unsupported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}" && exit 1 ;; \
   esac
 
@@ -148,13 +151,11 @@ RUN true \
   && mkdir -p /etc/conf.d/ \
   && mkdir -p /etc/systemd/system/console-getty.service.d/ \
   && mv ./core/init /usr/local/bin/init \
-  && mv ./core/profile.d/* /etc/profile.d/ \
   && mv ./core/systemd/getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf \
   && mv ./core/systemd/pacman-init /usr/local/bin/ \
   && mv ./core/systemd/pacman-init.service /etc/systemd/system/ \
   && mv ./core/systemd/xpra.conf /etc/conf.d/xpra \
   && mv ./core/systemd/xpra@.service /etc/systemd/system/ \
-  && chmod a+x /etc/profile.d/*.sh \
   && chmod +x /usr/local/bin/init \
   && chmod +x /usr/local/bin/pacman-init \
   && systemctl enable pacman-init \
