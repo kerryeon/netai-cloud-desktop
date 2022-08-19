@@ -145,9 +145,7 @@ RUN true \
 # Delete makepkg user and workdir
 RUN userdel $makepkg \
   && rm /etc/sudoers.d/$makepkg \
-  && rm -rf /tmp/**/* \
-  # Remove proxy settings
-  && sed -i 's/^keyserver-options http-proxy\=.+$//g' /etc/pacman.d/gnupg/gpg.conf
+  && rm -rf /tmp/**/*
 
 # Initiate with systemd
 WORKDIR /tmp
