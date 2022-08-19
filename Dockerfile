@@ -81,8 +81,6 @@ WORKDIR /tmp
 ADD packages/ ./packages/
 RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   && sudo pacman -Sy \
-  # Import 3rdparty package key: xf86-video-dummy-xpra-patch
-  && if [[ ! -z "$http_proxy" ]]; then sudo pacman-key --recv-keys "7B27A3F1A6E18CD9588B4AE8310180050905E40C"; fi \
   # Install 3rdparty package: yay-bin
   && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/yay.tar.gz" | tar xzf - \
   && pushd "yay" \
