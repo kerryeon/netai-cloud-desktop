@@ -1,7 +1,7 @@
 # Select Desktop Environment
 FROM docker.io/lopsided/archlinux:devel
 
-# Configure default environment variables
+# Set default environment variables
 ARG __GRAPHICS_VENDOR_NAME=nvidia
 ARG __GRAPHICS_NVIDIA_VERSION=510
 
