@@ -20,7 +20,7 @@ ENV \
 # Check environment variables
 RUN case "${__GRAPHICS_VENDOR_NAME}" in \
   "nvidia") echo "Supported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}:${__GRAPHICS_NVIDIA_VERSION}" && exit 0 ;; \
-  "") echo "GPU Vendor is required!" && exit 1 ;; \
+  "") echo "No GPU vendors (Without H/W Acceleration)" && exit 0 ;; \
   *) echo "Unsupported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}" && exit 1 ;; \
   esac
 
