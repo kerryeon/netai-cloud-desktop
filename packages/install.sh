@@ -1,3 +1,3 @@
 #!/bin/bash
 
-exec yay -Sy --needed --noconfirm $(sudo cat $1 | grep -o '^[^#]*')
+exec yay -S --needed --noconfirm $(sudo cat $1 | grep -o '^[^#]*')
