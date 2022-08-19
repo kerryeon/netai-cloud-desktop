@@ -1,36 +1,51 @@
 # Select Desktop Environment
 FROM docker.io/lopsided/archlinux:devel
 
+# Configure default environment variables
+ARG __GRAPHICS_VENDOR_NAME=nvidia
+ARG __GRAPHICS_NVIDIA_VERSION=510
+
 # Configure environment variables
 ENV \
-  no_proxy=0,1,2,3,4,5,6,7,8,9,.netai-cloud,localhost,localdomain \
-  __GLX_VENDOR_LIBRARY_NAME=nvidia \
-  __NV_PRIME_RENDER_OFFLOAD=1 \
-  __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
+  __GRAPHICS_VENDOR_NAME="${__GRAPHICS_VENDOR_NAME}" \
+  __GRAPHICS_NVIDIA_VERSION="${__GRAPHICS_NVIDIA_VERSION}"
+
+# Configure constant environment variables
+ENV \
+  no_proxy="0,1,2,3,4,5,6,7,8,9,.netai-cloud,localhost,localdomain" \
+  __GLX_VENDOR_LIBRARY_NAME="${__GRAPHICS_VENDOR_NAME}" \
+  __NV_PRIME_RENDER_OFFLOAD="1" \
+  __NV_PRIME_RENDER_OFFLOAD_PROVIDER="NVIDIA-G0"
+
+# Check environment variables
+RUN case "${__GRAPHICS_VENDOR_NAME}" in \
+  "nvidia") echo "Supported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}:${__GRAPHICS_NVIDIA_VERSION}" && exit 0 ;; \
+  "") echo "GPU Vendor is required!" && exit 1 ;; \
+  *) echo "Unsupported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}" && exit 1 ;; \
+  esac
 
 # Configure pacman
 RUN sed -i 's/^#\(ParallelDownloads.*\)$/\1/g' /etc/pacman.conf
 
 # Configure pacman per platform
 ARG reflector_country="KR"
-RUN if cat /etc/pacman.conf | grep "auto" > /dev/null; then \
+RUN if cat /etc/pacman.conf | grep "auto" > /dev/null; then true \
   # platform=linux/amd64
   # Install reflector for faster installation
-  pacman -Sy \
-  && pacman -S --needed --noconfirm \
-  glibc reflector systemd \
+  && pacman -Sy \
+  && pacman -S --needed --noconfirm glibc reflector systemd \
   && pacman -Scc --noconfirm \
   && rm -r /var/lib/pacman/sync/* \
   && sed -i "s/\(^# --country.*\$\)/\1\n--country $reflector_country/g" /etc/xdg/reflector/reflector.conf \
   && systemctl enable reflector.timer \
   && reflector --country $reflector_country > /etc/pacman.d/mirrorlist \
   # Support x86 binaries
-  && printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf; \
-  else \
+  && printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf \
+  ; else true \
   # platform=linux/arm64 (supposed)
   # Set package repositories manually
-  printf 'Server = http://jp.mirror.archlinuxarm.org/$arch/$repo' > /etc/pacman.d/mirrorlist; \
-  fi
+  && printf 'Server = http://jp.mirror.archlinuxarm.org/$arch/$repo' > /etc/pacman.d/mirrorlist \
+  ; fi
 
 # Add more package repositories
 RUN printf '\n[archlinuxcn]\nServer = https://repo.archlinuxcn.org/$arch' >> /etc/pacman.conf \
@@ -55,8 +70,7 @@ RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
   && rm -r /var/lib/pacman/sync/*
 
 # Install core packages
-RUN pacman -Sy --needed --noconfirm \
-  base base-devel shadow sudo wget \
+RUN pacman -Sy --needed --noconfirm base base-devel shadow sudo wget \
   && pacman -Scc --noconfirm \
   && rm -r /var/lib/pacman/sync/* \
   && touch /etc/subuid /etc/subgid
@@ -88,15 +102,21 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   && popd \
   && rm -rf "yay" "yay.tar.gz" \
   # Install 3rdparty package: nvidia-sdk
+  && if [ "${__GRAPHICS_VENDOR_NAME}" = "nvidia" ]; then true \
   && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/nvidia-sdk.tar.gz" | tar xzf - \
   && pushd "nvidia-sdk" \
   && sudo mv ../packages/nonfree/Video_Codec_SDK_*.zip . \
   && makepkg -scri --noconfirm \
   && popd \
   && sudo rm -rf "nvidia-sdk" "nvidia-sdk.tar.gz" \
+  ; fi \
   # Install packages: Common, Graphics, Xpra
   && /bin/bash ./packages/install.sh ./packages/common \
-  && /bin/bash ./packages/install.sh ./packages/graphics \
+  && /bin/bash ./packages/install.sh ./packages/graphics-common \
+  && if [ ${__GRAPHICS_VENDOR_NAME} = "nvidia" ]; then true \
+  && yay -S "nvidia-${__GRAPHICS_NVIDIA_VERSION}xx-utils" \
+  && /bin/bash ./packages/install.sh ./packages/graphics-nvidia \
+  ; fi \
   && /bin/bash ./packages/install.sh ./packages/xpra \
   # Install 3rdparty package: xpra-git
   && curl -s "https://aur.archlinux.org/cgit/aur.git/snapshot/xpra-git.tar.gz" | tar xzf - \
