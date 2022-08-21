@@ -118,7 +118,6 @@ RUN sudo mv ./packages/lib/pkgconfig/* /usr/lib/pkgconfig/ \
   && /bin/bash ./packages/install.sh ./packages/graphics-common \
   && if [ ${__GRAPHICS_VENDOR_NAME} = "nvidia" ]; then true \
   && /bin/bash ./packages/install.sh ./packages/graphics-nvidia \
-  && yay -Rns --noconfirm nvidia-sdk \
   ; fi \
   && /bin/bash ./packages/install.sh ./packages/xpra \
   # Install 3rdparty package: xpra-git
