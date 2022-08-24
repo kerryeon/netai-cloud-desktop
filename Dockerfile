@@ -28,7 +28,7 @@ RUN case "${__GRAPHICS_VENDOR_NAME}" in \
 # Configure pacman
 RUN true \
   && sed -i 's/^#\(ParallelDownloads.*\)$/\1/g' /etc/pacman.conf \
-  && sed -i 's/^#\(IgnorePkg *\)\=/\1 \= cuda,nvidia-utils,opencl-nvidia/g' /etc/pacman.conf
+  && sed -i 's/^#\(IgnorePkg *\)\=/\1 \= cuda nvidia-utils opencl-nvidia/g' /etc/pacman.conf
 
 # Reinstall excluded files
 RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
