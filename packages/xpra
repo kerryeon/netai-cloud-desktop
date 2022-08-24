@@ -10,6 +10,7 @@ libvorbis
 libvpx
 libwebp
 opus
+python-uinput
 wavpack
 x264
 xorg-xrandr

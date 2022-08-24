@@ -25,13 +25,13 @@ RUN case "${__GRAPHICS_VENDOR_NAME}" in \
   *) echo "Unsupported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}" && exit 1 ;; \
   esac
 
-# Configure pacman
-RUN true \
-  && sed -i 's/^#\(ParallelDownloads.*\)$/\1/g' /etc/pacman.conf \
-  && sed -i 's/^#\(IgnorePkg *\)\=/\1 \= cuda nvidia-utils opencl-nvidia/g' /etc/pacman.conf
-
 # Reinstall excluded files
-RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
+RUN true \
+  # Configure pacman
+  && sed -i 's/^#\(ParallelDownloads.*\)$/\1/g' /etc/pacman.conf \
+  && sed -i 's/^#\(IgnorePkg *\)\=/\1 \= cuda nvidia-utils opencl-nvidia/g' /etc/pacman.conf \
+  && sed -i 's/^\(NoExtract.*\)$/#\1/g' /etc/pacman.conf \
+  # Refresh default hard-coded files
   && rm /etc/locale.gen \
   && pacman -Syy \
   && pacman -Qqn | pacman -S --noconfirm --overwrite="*" - \
