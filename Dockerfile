@@ -3,13 +3,11 @@ FROM docker.io/lopsided/archlinux:devel
 
 # Set default environment variables
 ARG __GRAPHICS_VENDOR_NAME=nvidia
-ARG __GRAPHICS_NVIDIA_VERSION=510
 
 # Configure environment variables
 ENV \
   __GRAPHICS_VENDOR_NAME="${__GRAPHICS_VENDOR_NAME}" \
-  __GRAPHICS_NVIDIA_HOME="/usr/local/nvidia" \
-  __GRAPHICS_NVIDIA_VERSION="${__GRAPHICS_NVIDIA_VERSION}"
+  __GRAPHICS_NVIDIA_HOME="/usr/local/nvidia"
 
 # Configure constant environment variables
 ENV \
@@ -23,46 +21,14 @@ ENV \
 # Check environment variables
 RUN case "${__GRAPHICS_VENDOR_NAME}" in \
   "") echo "No GPU vendors (Without H/W Acceleration)" ;; \
-  "nvidia") echo "Supported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}:${__GRAPHICS_NVIDIA_VERSION}" ;; \
+  "nvidia") echo "Supported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}" ;; \
   *) echo "Unsupported GPU Vendor: ${__GRAPHICS_VENDOR_NAME}" && exit 1 ;; \
   esac
 
 # Configure pacman
-RUN sed -i 's/^#\(ParallelDownloads.*\)$/\1/g' /etc/pacman.conf
-
-# Configure pacman per platform
-ARG reflector_country="KR"
-RUN if cat /etc/pacman.conf | grep "auto" > /dev/null; then true \
-  # platform=linux/amd64
-  # Install reflector for faster installation
-  && pacman -Sy \
-  && pacman -S --needed --noconfirm glibc reflector systemd \
-  && pacman -Scc --noconfirm \
-  && rm -r /var/lib/pacman/sync/* \
-  && sed -i "s/\(^# --country.*\$\)/\1\n--country $reflector_country/g" /etc/xdg/reflector/reflector.conf \
-  && systemctl enable reflector.timer \
-  && reflector --country $reflector_country > /etc/pacman.d/mirrorlist \
-  # Support x86 binaries
-  && printf '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf \
-  ; else true \
-  # platform=linux/arm64 (supposed)
-  # Set package repositories manually
-  && printf 'Server = http://jp.mirror.archlinuxarm.org/$arch/$repo' > /etc/pacman.d/mirrorlist \
-  ; fi
-
-# Add more package repositories
-RUN printf '\n[archlinuxcn]\nServer = https://repo.archlinuxcn.org/$arch' >> /etc/pacman.conf \
-  # use proxy for importing PGP keys
-  && printf "keyserver-options http-proxy=${http_proxy}\n" >> /etc/pacman.d/gnupg/gpg.conf \
-  # generate a default secret key
-  && pacman-key --init \
-  # refresh database because of changing mirrorlists
-  && pacman -Syy \
-  # import PGP keys
-  && pacman -Sy --noconfirm archlinux-keyring \
-  && pacman -Sy --noconfirm archlinuxcn-keyring \
-  && pacman -Scc --noconfirm \
-  && rm -r /var/lib/pacman/sync/*
+RUN true \
+  && sed -i 's/^#\(ParallelDownloads.*\)$/\1/g' /etc/pacman.conf \
+  && sed -i 's/^#\(IgnorePkg *\)\=/\1 \= cuda,nvidia-utils,opencl-nvidia/g' /etc/pacman.conf
 
 # Reinstall excluded files
 RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
@@ -73,7 +39,7 @@ RUN sed -i 's/^NoExtract\(.*\)$//g' /etc/pacman.conf \
   && rm -r /var/lib/pacman/sync/*
 
 # Install core packages
-RUN pacman -Sy --needed --noconfirm base base-devel shadow sudo wget \
+RUN pacman -Sy --needed --noconfirm base base-devel glibc shadow systemd sudo wget \
   && pacman -Scc --noconfirm \
   && rm -r /var/lib/pacman/sync/* \
   && touch /etc/subuid /etc/subgid

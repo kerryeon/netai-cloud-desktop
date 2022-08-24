@@ -32,7 +32,6 @@ python-pyinotify
 python-pyu2f
 python-scikit-learn
 python-tqdm
-python-uinput
 python-zeroconf
 ## Rust
 rustup
