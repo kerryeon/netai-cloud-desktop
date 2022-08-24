@@ -13,5 +13,6 @@ opus
 python-uinput
 wavpack
 x264
-xorg-xrandr
+xorg-server
 xorg-server-xvfb
+xorg-xrandr
