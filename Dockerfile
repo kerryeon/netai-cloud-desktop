@@ -115,6 +115,7 @@ ADD ./core ./core
 RUN true \
   && mkdir -p /etc/conf.d/ \
   && mkdir -p /etc/systemd/system/console-getty.service.d/ \
+  && mv ./core/nvidia/*.sh /usr/local/bin/ \
   && mv ./core/init /usr/local/bin/init \
   && mv ./core/systemd/getty_override.conf /etc/systemd/system/console-getty.service.d/override.conf \
   && mv ./core/systemd/pacman-init /usr/local/bin/ \
